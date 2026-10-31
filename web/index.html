@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>МЕП-26-1 — кабінет</title>
+<style>
+:root{--blue:#2563eb;--ink:#172033;--muted:#64748b;--line:#e5eaf1;--bg:#f5f8fc;--green:#15803d;--red:#b91c1c;--amber:#a16207}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
+.wrap{max-width:760px;margin:auto;padding:18px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+.brand{display:flex;align-items:center;gap:11px}.logo{width:42px;height:42px;border-radius:13px;background:var(--blue);color:white;display:grid;place-items:center;font-weight:800}
+h1{font-size:20px;margin:0}small,.muted{color:var(--muted)}.pill{font-size:12px;background:#eaf1ff;color:#1d4ed8;padding:5px 9px;border-radius:99px}
+.card{background:white;border:1px solid var(--line);border-radius:17px;padding:16px;margin:12px 0;box-shadow:0 3px 12px #0f172a08}
+.hero{background:linear-gradient(120deg,#fff,#edf4ff)}.hero h2{margin:0 0 4px;font-size:22px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{background:#f8fafc;border:1px solid var(--line);padding:13px;border-radius:13px}.stat b{display:block;font-size:21px}
+button,select{font:inherit}select{padding:10px;border:1px solid var(--line);border-radius:10px;background:white;color:var(--ink)}
+button{border:0;border-radius:10px;padding:10px 13px;background:var(--blue);color:white;cursor:pointer}
+button.secondary{background:#eef2f7;color:#263449}button.small{padding:7px 9px;font-size:13px}
+.tabs{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}.tabs button{background:white;color:#334155;border:1px solid var(--line)}.tabs button.active{background:var(--blue);color:white;border-color:var(--blue)}
+.badge{font-size:12px;padding:4px 8px;border-radius:99px;white-space:nowrap}.ok{background:#dcfce7;color:var(--green)}.no{background:#fee2e2;color:var(--red)}.warn{background:#fef3c7;color:var(--amber)}.info{background:#dbeafe;color:#1d4ed8}
+.item{padding:12px 0;border-bottom:1px solid var(--line)}.item:last-child{border:0}.item p{margin:2px 0 0;color:var(--muted);font-size:13px}
+.notice{border-left:3px solid var(--blue);padding:10px 12px;background:#f8fafc;border-radius:8px;margin:8px 0}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:18px}
+label{font-size:13px;color:var(--muted);display:block;margin-bottom:5px}
+@media(max-width:480px){.wrap{padding:13px}.grid{gap:8px}.card{padding:14px}}
+</style></head>
+<body><main class="wrap">
+<header class="top"><div class="brand"><div class="logo">М</div><div><h1>МЕП-26-1</h1><small>Інформаційний кабінет групи</small></div></div><span class="pill">DEMO</span></header>
+<section class="card hero"><div class="row"><div><h2>Вітаємо!</h2><div class="muted">Демонстраційна версія особистого кабінету</div></div><span style="font-size:28px">🎓</span></div></section>
+<section class="card">
+<div class="grid">
+<div><label for="role">Режим перегляду</label><select id="role"><option value="parent">Батьки</option><option value="student">Студент</option><option value="admin">Староста</option></select></div>
+<div><label for="student">Тестовий профіль</label><select id="student"><option value="s1">Студент №1</option><option value="s2">Студент №2</option><option value="s3">Студент №3</option></select></div>
+</div><p class="muted" style="font-size:12px;margin-bottom:0">У демо перемикання доступне для перевірки. У справжній системі доступ визначатиметься сервером.</p>
+</section>
+<nav class="tabs" id="tabs"></nav><div id="content"></div>
+<footer>МЕП-26-1 · Тестові дані, не використовувати для реального обліку.</footer>
+</main>
+<script>
+const students={s1:"Студент №1",s2:"Студент №2",s3:"Студент №3"};
+const pairs=[
+ {id:"p1",subject:"Математика",time:"1 пара"},
+ {id:"p2",subject:"Фізика",time:"2 пара"},
+ {id:"p3",subject:"Українська мова",time:"3 пара"},
+ {id:"p4",subject:"Інформатика",time:"4 пара"}
+];
+const fees=[{id:"f1",name:"Фонд групи",amount:200,date:"30.10.2026"},{id:"f2",name:"Екскурсія",amount:350,date:"02.11.2026"},{id:"f3",name:"Навчальні матеріали",amount:150,date:"05.11.2026"}];
+let attendance={s1:{p1:"Присутній",p2:"Відсутній",p3:"Присутній",p4:"Запізнення"},s2:{p1:"Присутній",p2:"Присутній",p3:"Присутній",p4:"Присутній"},s3:{p1:"Не відмічено",p2:"Не відмічено",p3:"Не відмічено",p4:"Не відмічено"}};
+let paid={s1:{f1:"Здано",f2:"Не здано",f3:"Частково"},s2:{f1:"Здано",f2:"Здано",f3:"Не здано"},s3:{f1:"Не здано",f2:"Не здано",f3:"Не здано"}};
+let messages=[{title:"Нагадування",body:"Перевірте інформацію про найближчі збори.",date:"30.10.2026",read:false},{title:"Оголошення групи",body:"Це демонстраційне повідомлення для перевірки кабінету.",date:"29.10.2026",read:false}];
+let tab="overview";
+const $=id=>document.getElementById(id);
+function badge(status){let c=status==="Присутній"||status==="Здано"?"ok":status==="Відсутній"||status==="Не здано"?"no":status==="Не відмічено"?"info":"warn";return `<span class="badge ${c}">${status}</span>`}
+function tabs(){let role=$("role").value;let list=role==="admin"?[["overview","Огляд"],["attendance","Відвідуваність"],["fees","Кошти"],["messages","Повідомлення"]]:[["overview","Огляд"],["attendance","Відвідуваність"],["fees","Кошти"],["messages","Повідомлення"],["profile","Профіль"]];$("tabs").innerHTML=list.map(([id,n])=>`<button class="${tab===id?"active":""}" data-tab="${id}">${n}${id==="messages"&&messages.some(m=>!m.read)?" •":""}</button>`).join("");$("tabs").querySelectorAll("button").forEach(b=>b.onclick=()=>{tab=b.dataset.tab;if(tab==="messages")messages.forEach(m=>m.read=true);render()})}
+function render(){tabs();let role=$("role").value,sid=$("student").value,name=students[sid],a=attendance[sid],f=paid[sid];let html="";
+if(tab==="overview"){let attended=Object.values(a).filter(x=>x==="Присутній").length;let paidCount=Object.values(f).filter(x=>x==="Здано").length;html=`<section class="card"><div class="row"><div><h2 style="margin:0">${name}</h2><span class="muted">Група МЕП-26-1</span></div><span class="pill">${role==="admin"?"Панель старости":role==="student"?"Кабінет студента":"Кабінет батьків"}</span></div></section><div class="grid"><div class="stat"><span class="muted">Присутність сьогодні</span><b>${attended}/${pairs.length}</b><small>пар відвідано</small></div><div class="stat"><span class="muted">Збори</span><b>${paidCount}/${fees.length}</b><small>повністю здано</small></div></div><section class="card"><h3>Останні повідомлення</h3>${messages.map(m=>`<div class="notice"><b>${m.title}</b><div>${m.body}</div><small>${m.date}</small></div>`).join("")}</section>`}
+if(tab==="attendance"){html=`<section class="card"><h3>Відвідуваність за парами</h3><p class="muted">30 жовтня 2026 · тестовий день</p>${pairs.map(p=>`<div class="item"><div class="row"><div><b>${p.time} · ${p.subject}</b></div>${role==="admin"?`<select data-att="${p.id}">${["Присутній","Відсутній","Запізнення","Не відмічено"].map(s=>`<option ${a[p.id]===s?"selected":""}>${s}</option>`).join("")}</select>`:badge(a[p.id])}</div></div>`).join("")}</section>`}
+if(tab==="fees"){html=`<section class="card"><h3>Облік коштів</h3><p class="muted">Кожен збір окремо</p>${fees.map(x=>`<div class="item"><div class="row"><div><b>${x.name}</b><p>${x.amount} грн · до ${x.date}</p></div>${role==="admin"?`<select data-fee="${x.id}">${["Не здано","Частково","Здано"].map(s=>`<option ${f[x.id]===s?"selected":""}>${s}</option>`).join("")}</select>`:badge(f[x.id])}</div></div>`).join("")}</section>`}
+if(tab==="messages"){html=`<section class="card"><div class="row"><h3>Повідомлення</h3>${role==="admin"?'<button id="addmsg" class="small">Додати</button>':""}</div>${messages.map(m=>`<div class="notice"><div class="row"><b>${m.title}</b>${m.read?'<span class="badge ok">Переглянуто</span>':'<span class="badge info">Нове</span>'}</div><div>${m.body}</div><small>${m.date}</small></div>`).join("")}</section>`}
+if(tab==="profile"){html=`<section class="card"><h3>Профіль студента</h3><div class="item"><span class="muted">Ім'я</span><br><b>${name}</b></div><div class="item"><span class="muted">Група</span><br><b>МЕП-26-1</b></div><div class="item"><span class="muted">Тип кабінету</span><br><b>${role==="student"?"Студент": "Батьківський перегляд"}</b></div></section>`}
+$("content").innerHTML=html;
+$("content").querySelectorAll("[data-att]").forEach(el=>el.onchange=()=>{a[el.dataset.att]=el.value;render()});
+$("content").querySelectorAll("[data-fee]").forEach(el=>el.onchange=()=>{f[el.dataset.fee]=el.value;render()});
+let add=$("addmsg");if(add)add.onclick=()=>{let title=prompt("Заголовок повідомлення:");if(!title)return;let body=prompt("Текст повідомлення:");if(!body)return;messages.unshift({title,body,date:"30.10.2026",read:false});tab="messages";render()};
+}
+$("role").onchange=()=>{tab="overview";render()};$("student").onchange=()=>{tab="overview";render()};render();
+</script></body></html>
