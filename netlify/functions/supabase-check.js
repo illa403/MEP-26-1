@@ -17,9 +17,8 @@ exports.handler = async () => {
     const response = await fetch(
       `${url.replace(/\/$/, "")}/rest/v1/`,
       {
-       headers: {
-  apikey: key
-}
+        headers: {
+          apikey: key
         }
       }
     );
@@ -37,7 +36,7 @@ exports.handler = async () => {
           : "Supabase responded; check API configuration"
       })
     };
-  } catch {
+  } catch (error) {
     return {
       statusCode: 502,
       body: JSON.stringify({
