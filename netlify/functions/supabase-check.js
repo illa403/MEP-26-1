@@ -15,7 +15,7 @@ exports.handler = async () => {
 
   try {
     const response = await fetch(
-      `${url.replace(/\/$/, "")}/rest/v1/`,
+      `${url.replace(/\/$/, "")}/rest/v1/students?select=id&limit=1`
       {
         headers: {
           apikey: key
