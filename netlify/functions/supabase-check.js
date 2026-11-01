@@ -17,9 +17,9 @@ exports.handler = async () => {
     const response = await fetch(
       `${url.replace(/\/$/, "")}/rest/v1/`,
       {
-        headers: {
-          apikey: key,
-          Authorization: `Bearer ${key}`
+       headers: {
+  apikey: key
+}
         }
       }
     );
