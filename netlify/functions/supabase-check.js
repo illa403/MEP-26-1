@@ -1,48 +1,34 @@
 
-exports.handler = async () => {
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_PUBLISHABLE_KEY;
+exports.handler = async function () {
+  var url = process.env.SUPABASE_URL;
+  var key = process.env.SUPABASE_PUBLISHABLE_KEY;
 
   if (!url || !key) {
     return {
       statusCode: 500,
-      body: JSON.stringify({
-        ok: false,
-        message: "Missing Supabase environment variables"
-      })
+      body: JSON.stringify({ ok: false, message: "Missing environment variables" })
     };
   }
 
   try {
-    const response = await fetch(
-      `${url.replace(/\/$/, "")}/rest/v1/students?select=id&limit=1`
-      {
-        headers: {
-          apikey: key
-        }
-      }
-    );
+    var apiUrl = url.replace(/\/$/, "") + "/rest/v1/students?select=id&limit=1";
+    var response = await fetch(apiUrl, {
+      headers: { apikey: key }
+    });
 
     return {
       statusCode: 200,
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         ok: response.ok,
         supabaseStatus: response.status,
-        message: response.ok
-          ? "Supabase connection successful"
-          : "Supabase responded; check API configuration"
+        message: response.ok ? "Connection successful" : "Supabase rejected the request"
       })
     };
   } catch (error) {
     return {
       statusCode: 502,
-      body: JSON.stringify({
-        ok: false,
-        message: "Could not connect to Supabase"
-      })
+      body: JSON.stringify({ ok: false, message: "Connection failed" })
     };
   }
 };
