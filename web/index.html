@@ -65,4 +65,8 @@ $("content").querySelectorAll("[data-fee]").forEach(el=>el.onchange=()=>{f[el.da
 let add=$("addmsg");if(add)add.onclick=()=>{let title=prompt("Заголовок повідомлення:");if(!title)return;let body=prompt("Текст повідомлення:");if(!body)return;messages.unshift({title,body,date:"30.10.2026",read:false});tab="messages";render()};
 }
 $("role").onchange=()=>{tab="overview";render()};$("student").onchange=()=>{tab="overview";render()};render();
+ if (window.Telegram?.WebApp) {
+  window.Telegram.WebApp.ready();
+  console.log("Telegram WebApp доступний:", !!window.Telegram.WebApp.initData);
+}
 </script></body></html>
