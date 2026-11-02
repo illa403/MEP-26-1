@@ -38,6 +38,36 @@ label{font-size:13px;color:var(--muted);display:block;margin-bottom:5px}
 <footer>МЕП-26-1 · Тестові дані, не використовувати для реального обліку.</footer>
 </main>
 <script>
+ async function verifyTelegram() {
+  const tg = window.Telegram?.WebApp;
+
+  if (!tg || !tg.initData) {
+    alert("Відкрий кабінет через Telegram.");
+    return false;
+  }
+
+  try {
+    const response = await fetch("/.netlify/functions/portal-api", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ initData: tg.initData })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok || !result.ok) {
+      alert("Не вдалося підтвердити вхід через Telegram.");
+      return false;
+    }
+
+    tg.ready();
+    window.telegramUser = result.telegramUser;
+    return true;
+  } catch {
+    alert("Помилка з'єднання із сервером.");
+    return false;
+  }
+}
 const students={s1:"Студент №1",s2:"Студент №2",s3:"Студент №3"};
 const pairs=[
  {id:"p1",subject:"Математика",time:"1 пара"},
