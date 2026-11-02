@@ -1,0 +1,199 @@
+const crypto = require("crypto");
+
+const headers = {
+  "Content-Type": "application/json; charset=utf-8",
+  "Cache-Control": "no-store",
+};
+
+function reply(statusCode, data) {
+  return {
+    statusCode,
+    headers,
+    body: JSON.stringify(data),
+  };
+}
+
+function verifyTelegram(initData, botToken) {
+  if (
+    typeof initData !== "string" ||
+    !initData ||
+    initData.length > 16384
+  ) {
+    return null;
+  }
+
+  const params = new URLSearchParams(initData);
+  const receivedHash = params.get("hash");
+
+  if (!receivedHash || !/^[a-f0-9]{64}$/i.test(receivedHash)) {
+    return null;
+  }
+
+  params.delete("hash");
+
+  const dataCheckString = [...params.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([key, value]) => `${key}=${value}`)
+    .join("\n");
+
+  const secretKey = crypto
+    .createHmac("sha256", "WebAppData")
+    .update(botToken)
+    .digest();
+
+  const calculatedHash = crypto
+    .createHmac("sha256", secretKey)
+    .update(dataCheckString)
+    .digest();
+
+  const suppliedHash = Buffer.from(receivedHash, "hex");
+
+  if (
+    suppliedHash.length !== calculatedHash.length ||
+    !crypto.timingSafeEqual(suppliedHash, calculatedHash)
+  ) {
+    return null;
+  }
+
+  const authDate = Number(params.get("auth_date"));
+  const now = Math.floor(Date.now() / 1000);
+
+  if (
+    !Number.isFinite(authDate) ||
+    authDate > now + 30 ||
+    now - authDate > 86400
+  ) {
+    return null;
+  }
+
+  let user;
+
+  try {
+    user = JSON.parse(params.get("user") || "null");
+  } catch {
+    return null;
+  }
+
+  if (!user || !Number.isSafeInteger(user.id) || user.id <= 0) {
+    return null;
+  }
+
+  return {
+    id: String(user.id),
+    first_name: user.first_name || "",
+    username: user.username || "",
+  };
+}
+
+async function findProfile(telegramId) {
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const secretKey = process.env.SUPABASE_SECRET_KEY;
+
+  const url = new URL("/rest/v1/profiles", supabaseUrl);
+
+  url.searchParams.set(
+    "select",
+    "telegram_id,display_name,role"
+  );
+
+  url.searchParams.set("telegram_id", `eq.${telegramId}`);
+  url.searchParams.set("limit", "2");
+
+  const response = await fetch(url, {
+    headers: {
+      apikey: secretKey,
+      Authorization: `Bearer ${secretKey}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Profile lookup failed");
+  }
+
+  const profiles = await response.json();
+
+  // Require exactly one matching profile.
+  if (!Array.isArray(profiles) || profiles.length !== 1) {
+    return null;
+  }
+
+  return profiles[0];
+}
+
+exports.handler = async (event) => {
+  if (event.httpMethod !== "POST") {
+    return reply(405, {
+      ok: false,
+      error: "Method not allowed",
+    });
+  }
+
+  let body;
+
+  try {
+    body = JSON.parse(event.body || "{}");
+  } catch {
+    return reply(400, {
+      ok: false,
+      error: "Invalid JSON",
+    });
+  }
+
+  const botToken = process.env.TELEGRAM_BOT_TOKEN;
+
+  if (
+    !botToken ||
+    !process.env.SUPABASE_URL ||
+    !process.env.SUPABASE_SECRET_KEY
+  ) {
+    return reply(500, {
+      ok: false,
+      error: "Server configuration incomplete",
+    });
+  }
+
+  const telegramUser = verifyTelegram(body.initData, botToken);
+
+  if (!telegramUser) {
+    return reply(401, {
+      ok: false,
+      error: "Telegram verification failed",
+    });
+  }
+
+  try {
+    const profile = await findProfile(telegramUser.id);
+
+    if (!profile) {
+      return reply(403, {
+        ok: false,
+        error: "PROFILE_NOT_LINKED",
+        message:
+          "Твій Telegram ще не прив’язаний до профілю. Звернися до адміністратора.",
+      });
+    }
+
+    if (!["parent", "student", "admin"].includes(profile.role)) {
+      return reply(403, {
+        ok: false,
+        error: "Invalid profile role",
+      });
+    }
+
+    return reply(200, {
+      ok: true,
+      telegramUser,
+      profile: {
+        telegram_id: String(profile.telegram_id),
+        display_name:
+          profile.display_name || telegramUser.first_name,
+        role: profile.role,
+      },
+    });
+  } catch {
+    return reply(502, {
+      ok: false,
+      error: "Profile service unavailable",
+    });
+  }
+};
