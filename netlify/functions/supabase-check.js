@@ -1,20 +1,20 @@
 
 exports.handler = async function () {
-  var url = process.env.SUPABASE_URL;
-  var key = process.env.SUPABASE_PUBLISHABLE_KEY;
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SECRET_KEY;
 
   if (!url || !key) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ ok: false, message: "Missing environment variables" })
+      body: JSON.stringify({ ok: false, message: "Missing server configuration" })
     };
   }
 
   try {
-    var apiUrl = url.replace(/\/$/, "") + "/rest/v1/students?select=id&limit=1";
-    var response = await fetch(apiUrl, {
-      headers: { apikey: key }
-    });
+    const response = await fetch(
+      url.replace(/\/$/, "") + "/rest/v1/students?select=id&limit=1",
+      { headers: { apikey: key } }
+    );
 
     return {
       statusCode: 200,
@@ -25,7 +25,7 @@ exports.handler = async function () {
         message: response.ok ? "Connection successful" : "Supabase rejected the request"
       })
     };
-  } catch (error) {
+  } catch {
     return {
       statusCode: 502,
       body: JSON.stringify({ ok: false, message: "Connection failed" })
